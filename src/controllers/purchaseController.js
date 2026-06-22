@@ -4,6 +4,7 @@ const { adjustStock, toPositiveNumber } = require("../utils/stock");
 const Item = require("../models/Item");
 const Supplier = require("../models/Supplier");
 const Purchase = require("../models/Purchase");
+const { emitInventoryUpdate } = require("../utils/realtime");
 
 const buildDateFilter = (field, startDate, endDate) => {
   if (!startDate && !endDate) return {};
@@ -107,6 +108,7 @@ const deletePurchase = asyncHandler(async (req, res) => {
   const purchase = await Purchase.findByIdAndDelete(req.params.id);
   if (!purchase) return res.status(404).json({ message: "Purchase not found" });
 
+  emitInventoryUpdate({ area: "purchases", action: "deleted", purchaseId: purchase._id });
   res.json({ message: "Purchase deleted. Existing stock transactions were preserved for audit history." });
 });
 

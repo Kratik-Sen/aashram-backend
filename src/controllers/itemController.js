@@ -1,6 +1,7 @@
 const asyncHandler = require("../utils/asyncHandler");
 const Item = require("../models/Item");
 const StockTransaction = require("../models/StockTransaction");
+const { emitInventoryUpdate } = require("../utils/realtime");
 
 const getItems = asyncHandler(async (req, res) => {
   const { search, category, status, lowStock } = req.query;
@@ -65,6 +66,7 @@ const createItem = asyncHandler(async (req, res) => {
     status: status || "active"
   });
 
+  emitInventoryUpdate({ area: "items", action: "created", itemId: item._id });
   res.status(201).json(item);
 });
 
@@ -85,6 +87,7 @@ const updateItem = asyncHandler(async (req, res) => {
   }
 
   await item.save();
+  emitInventoryUpdate({ area: "items", action: "updated", itemId: item._id });
   res.json(item);
 });
 
@@ -95,6 +98,7 @@ const deleteItem = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Item not found" });
   }
 
+  emitInventoryUpdate({ area: "items", action: "deleted", itemId: item._id });
   res.json({ message: "Item deleted" });
 });
 

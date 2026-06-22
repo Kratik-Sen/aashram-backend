@@ -1,5 +1,6 @@
 const Item = require("../models/Item");
 const StockTransaction = require("../models/StockTransaction");
+const { emitInventoryUpdate } = require("./realtime");
 
 const toPositiveNumber = (value, fieldName = "quantity") => {
   const number = Number(value);
@@ -53,6 +54,14 @@ const adjustStock = async ({
     relatedModel,
     relatedId,
     note
+  });
+
+  emitInventoryUpdate({
+    area: "stock",
+    itemId: item._id,
+    type,
+    source,
+    quantity: parsedQuantity
   });
 
   return { item, transaction };

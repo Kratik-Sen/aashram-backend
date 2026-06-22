@@ -3,6 +3,7 @@ const { adjustStock, toPositiveNumber } = require("../utils/stock");
 const Item = require("../models/Item");
 const Department = require("../models/Department");
 const Request = require("../models/Request");
+const { emitInventoryUpdate } = require("../utils/realtime");
 
 const staffRoles = ["Kitchen Staff", "Department Staff"];
 
@@ -61,6 +62,7 @@ const createRequest = asyncHandler(async (req, res) => {
     .populate("requestedBy", "name role")
     .populate("department", "name");
 
+  emitInventoryUpdate({ area: "requests", action: "created", requestId: request._id });
   res.status(201).json(populated);
 });
 
@@ -83,6 +85,7 @@ const approveRequest = asyncHandler(async (req, res) => {
     .populate("department", "name")
     .populate("approvedBy", "name");
 
+  emitInventoryUpdate({ area: "requests", action: "approved", requestId: request._id });
   res.json(populated);
 });
 
@@ -105,6 +108,7 @@ const rejectRequest = asyncHandler(async (req, res) => {
     .populate("department", "name")
     .populate("rejectedBy", "name");
 
+  emitInventoryUpdate({ area: "requests", action: "rejected", requestId: request._id });
   res.json(populated);
 });
 
@@ -142,6 +146,7 @@ const issueRequest = asyncHandler(async (req, res) => {
     .populate("department", "name")
     .populate("approvedBy issuedBy", "name");
 
+  emitInventoryUpdate({ area: "requests", action: "issued", requestId: request._id });
   res.json(populated);
 });
 

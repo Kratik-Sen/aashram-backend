@@ -2,6 +2,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const Department = require("../models/Department");
 const StockIssue = require("../models/StockIssue");
 const Request = require("../models/Request");
+const { emitInventoryUpdate } = require("../utils/realtime");
 
 const getDepartments = asyncHandler(async (req, res) => {
   const { status, search } = req.query;
@@ -39,6 +40,7 @@ const createDepartment = asyncHandler(async (req, res) => {
   }
 
   const department = await Department.create({ name, description, status: status || "active" });
+  emitInventoryUpdate({ area: "departments", action: "created", departmentId: department._id });
   res.status(201).json(department);
 });
 
@@ -51,6 +53,7 @@ const updateDepartment = asyncHandler(async (req, res) => {
   });
 
   await department.save();
+  emitInventoryUpdate({ area: "departments", action: "updated", departmentId: department._id });
   res.json(department);
 });
 
@@ -58,6 +61,7 @@ const deleteDepartment = asyncHandler(async (req, res) => {
   const department = await Department.findByIdAndDelete(req.params.id);
   if (!department) return res.status(404).json({ message: "Department not found" });
 
+  emitInventoryUpdate({ area: "departments", action: "deleted", departmentId: department._id });
   res.json({ message: "Department deleted" });
 });
 
