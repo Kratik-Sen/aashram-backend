@@ -20,7 +20,8 @@ const adjustStock = async ({
   performedBy,
   relatedModel,
   relatedId,
-  note = ""
+  note = "",
+  suppressRealtime = false
 }) => {
   const parsedQuantity = toPositiveNumber(quantity);
   const item = await Item.findById(itemId);
@@ -56,13 +57,16 @@ const adjustStock = async ({
     note
   });
 
-  emitInventoryUpdate({
-    area: "stock",
-    itemId: item._id,
-    type,
-    source,
-    quantity: parsedQuantity
-  });
+  if (!suppressRealtime) {
+    emitInventoryUpdate({
+      area: "stock",
+      areas: ["stock", "items", "dashboard", "reports"],
+      itemId: item._id,
+      type,
+      source,
+      quantity: parsedQuantity
+    });
+  }
 
   return { item, transaction };
 };

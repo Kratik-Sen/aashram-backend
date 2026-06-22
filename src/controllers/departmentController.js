@@ -40,8 +40,8 @@ const createDepartment = asyncHandler(async (req, res) => {
   }
 
   const department = await Department.create({ name, description, status: status || "active" });
-  emitInventoryUpdate({ area: "departments", action: "created", departmentId: department._id });
   res.status(201).json(department);
+  emitInventoryUpdate({ area: "departments", areas: ["departments", "dashboard", "reports"], action: "created", departmentId: department._id });
 });
 
 const updateDepartment = asyncHandler(async (req, res) => {
@@ -53,16 +53,16 @@ const updateDepartment = asyncHandler(async (req, res) => {
   });
 
   await department.save();
-  emitInventoryUpdate({ area: "departments", action: "updated", departmentId: department._id });
   res.json(department);
+  emitInventoryUpdate({ area: "departments", areas: ["departments", "dashboard", "reports"], action: "updated", departmentId: department._id });
 });
 
 const deleteDepartment = asyncHandler(async (req, res) => {
   const department = await Department.findByIdAndDelete(req.params.id);
   if (!department) return res.status(404).json({ message: "Department not found" });
 
-  emitInventoryUpdate({ area: "departments", action: "deleted", departmentId: department._id });
   res.json({ message: "Department deleted" });
+  emitInventoryUpdate({ area: "departments", areas: ["departments", "dashboard", "reports"], action: "deleted", departmentId: department._id });
 });
 
 module.exports = { getDepartments, getDepartment, createDepartment, updateDepartment, deleteDepartment };

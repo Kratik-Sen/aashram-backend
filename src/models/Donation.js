@@ -45,6 +45,12 @@ const donationSchema = new mongoose.Schema(
       url: String,
       publicId: String
     },
+    images: [
+      {
+        url: String,
+        publicId: String
+      }
+    ],
     note: {
       type: String,
       trim: true,

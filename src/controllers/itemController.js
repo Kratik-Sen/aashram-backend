@@ -66,8 +66,8 @@ const createItem = asyncHandler(async (req, res) => {
     status: status || "active"
   });
 
-  emitInventoryUpdate({ area: "items", action: "created", itemId: item._id });
   res.status(201).json(item);
+  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "created", itemId: item._id });
 });
 
 const updateItem = asyncHandler(async (req, res) => {
@@ -87,8 +87,8 @@ const updateItem = asyncHandler(async (req, res) => {
   }
 
   await item.save();
-  emitInventoryUpdate({ area: "items", action: "updated", itemId: item._id });
   res.json(item);
+  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "updated", itemId: item._id });
 });
 
 const deleteItem = asyncHandler(async (req, res) => {
@@ -98,8 +98,8 @@ const deleteItem = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Item not found" });
   }
 
-  emitInventoryUpdate({ area: "items", action: "deleted", itemId: item._id });
   res.json({ message: "Item deleted" });
+  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "deleted", itemId: item._id });
 });
 
 module.exports = { getItems, getLowStockItems, getItem, createItem, updateItem, deleteItem };

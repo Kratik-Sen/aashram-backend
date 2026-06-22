@@ -47,8 +47,8 @@ const createSupplier = asyncHandler(async (req, res) => {
     status: status || "active"
   });
 
-  emitInventoryUpdate({ area: "suppliers", action: "created", supplierId: supplier._id });
   res.status(201).json(supplier);
+  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "created", supplierId: supplier._id });
 });
 
 const updateSupplier = asyncHandler(async (req, res) => {
@@ -66,16 +66,16 @@ const updateSupplier = asyncHandler(async (req, res) => {
   }
 
   await supplier.save();
-  emitInventoryUpdate({ area: "suppliers", action: "updated", supplierId: supplier._id });
   res.json(supplier);
+  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "updated", supplierId: supplier._id });
 });
 
 const deleteSupplier = asyncHandler(async (req, res) => {
   const supplier = await Supplier.findByIdAndDelete(req.params.id);
   if (!supplier) return res.status(404).json({ message: "Supplier not found" });
 
-  emitInventoryUpdate({ area: "suppliers", action: "deleted", supplierId: supplier._id });
   res.json({ message: "Supplier deleted" });
+  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "deleted", supplierId: supplier._id });
 });
 
 module.exports = { getSuppliers, getSupplier, createSupplier, updateSupplier, deleteSupplier };

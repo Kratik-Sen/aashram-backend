@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("../utils/asyncHandler");
 const User = require("../models/User");
+const { emitInventoryUpdate } = require("../utils/realtime");
 
 const signToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
@@ -59,6 +60,7 @@ const register = asyncHandler(async (req, res) => {
 
   const populatedUser = await User.findById(user._id).populate("department", "name");
   res.status(201).json({ user: userResponse(populatedUser) });
+  emitInventoryUpdate({ area: "users", areas: ["users"], action: "created", userId: user._id });
 });
 
 const me = asyncHandler(async (req, res) => {

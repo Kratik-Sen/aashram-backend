@@ -93,7 +93,8 @@ const createPurchase = asyncHandler(async (req, res) => {
     performedBy: req.user._id,
     relatedModel: "Purchase",
     relatedId: purchase._id,
-    note: note || `Purchase ${billNumber || purchase._id}`
+    note: note || `Purchase ${billNumber || purchase._id}`,
+    suppressRealtime: true
   });
 
   const populated = await Purchase.findById(purchase._id)
@@ -102,14 +103,22 @@ const createPurchase = asyncHandler(async (req, res) => {
     .populate("purchasedBy", "name");
 
   res.status(201).json(populated);
+  emitInventoryUpdate({
+    area: "purchases",
+    areas: ["purchases", "items", "stock", "dashboard", "reports"],
+    action: "created",
+    purchaseId: purchase._id,
+    itemId,
+    supplierId
+  });
 });
 
 const deletePurchase = asyncHandler(async (req, res) => {
   const purchase = await Purchase.findByIdAndDelete(req.params.id);
   if (!purchase) return res.status(404).json({ message: "Purchase not found" });
 
-  emitInventoryUpdate({ area: "purchases", action: "deleted", purchaseId: purchase._id });
   res.json({ message: "Purchase deleted. Existing stock transactions were preserved for audit history." });
+  emitInventoryUpdate({ area: "purchases", areas: ["purchases", "dashboard", "reports"], action: "deleted", purchaseId: purchase._id });
 });
 
 module.exports = { getPurchases, getPurchase, createPurchase, deletePurchase };

@@ -62,8 +62,14 @@ const createRequest = asyncHandler(async (req, res) => {
     .populate("requestedBy", "name role")
     .populate("department", "name");
 
-  emitInventoryUpdate({ area: "requests", action: "created", requestId: request._id });
   res.status(201).json(populated);
+  emitInventoryUpdate({
+    area: "requests",
+    areas: ["requests", "dashboard", "reports"],
+    action: "created",
+    requestId: request._id,
+    departmentId
+  });
 });
 
 const approveRequest = asyncHandler(async (req, res) => {
@@ -85,8 +91,14 @@ const approveRequest = asyncHandler(async (req, res) => {
     .populate("department", "name")
     .populate("approvedBy", "name");
 
-  emitInventoryUpdate({ area: "requests", action: "approved", requestId: request._id });
   res.json(populated);
+  emitInventoryUpdate({
+    area: "requests",
+    areas: ["requests", "dashboard", "reports"],
+    action: "approved",
+    requestId: request._id,
+    departmentId: request.department
+  });
 });
 
 const rejectRequest = asyncHandler(async (req, res) => {
@@ -108,8 +120,14 @@ const rejectRequest = asyncHandler(async (req, res) => {
     .populate("department", "name")
     .populate("rejectedBy", "name");
 
-  emitInventoryUpdate({ area: "requests", action: "rejected", requestId: request._id });
   res.json(populated);
+  emitInventoryUpdate({
+    area: "requests",
+    areas: ["requests", "dashboard", "reports"],
+    action: "rejected",
+    requestId: request._id,
+    departmentId: request.department
+  });
 });
 
 const issueRequest = asyncHandler(async (req, res) => {
@@ -131,7 +149,8 @@ const issueRequest = asyncHandler(async (req, res) => {
     performedBy: req.user._id,
     relatedModel: "Request",
     relatedId: request._id,
-    note: req.body.note || request.reason
+    note: req.body.note || request.reason,
+    suppressRealtime: true
   });
 
   request.status = "issued";
@@ -146,8 +165,15 @@ const issueRequest = asyncHandler(async (req, res) => {
     .populate("department", "name")
     .populate("approvedBy issuedBy", "name");
 
-  emitInventoryUpdate({ area: "requests", action: "issued", requestId: request._id });
   res.json(populated);
+  emitInventoryUpdate({
+    area: "requests",
+    areas: ["requests", "items", "stock", "dashboard", "reports"],
+    action: "issued",
+    requestId: request._id,
+    itemId: request.itemId._id,
+    departmentId: request.department
+  });
 });
 
 module.exports = { getRequests, createRequest, approveRequest, rejectRequest, issueRequest };

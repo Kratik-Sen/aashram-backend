@@ -9,7 +9,15 @@ const router = express.Router();
 router.use(protect);
 
 router.get("/", getDonations);
-router.post("/", allowRoles("Super Admin", "Store Manager"), upload.single("image"), createDonation);
+router.post(
+  "/",
+  allowRoles("Super Admin", "Store Manager"),
+  upload.fields([
+    { name: "images", maxCount: 3 },
+    { name: "image", maxCount: 1 }
+  ]),
+  createDonation
+);
 router.get("/:id", getDonation);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const asyncHandler = require("../utils/asyncHandler");
 const User = require("../models/User");
+const { emitInventoryUpdate } = require("../utils/realtime");
 
 const listUsers = asyncHandler(async (req, res) => {
   const { search, role, status } = req.query;
@@ -35,6 +36,7 @@ const updateUser = asyncHandler(async (req, res) => {
   await user.save();
   const updated = await User.findById(user._id).populate("department", "name");
   res.json(updated);
+  emitInventoryUpdate({ area: "users", areas: ["users"], action: "updated", userId: user._id });
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
@@ -48,6 +50,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 
   res.json({ message: "User deleted" });
+  emitInventoryUpdate({ area: "users", areas: ["users"], action: "deleted", userId: user._id });
 });
 
 module.exports = { listUsers, updateUser, deleteUser };

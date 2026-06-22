@@ -3,6 +3,7 @@ const { adjustStock, toPositiveNumber } = require("../utils/stock");
 const Item = require("../models/Item");
 const Department = require("../models/Department");
 const StockIssue = require("../models/StockIssue");
+const { emitInventoryUpdate } = require("../utils/realtime");
 
 const buildDateFilter = (field, startDate, endDate) => {
   if (!startDate && !endDate) return {};
@@ -81,7 +82,8 @@ const createIssue = asyncHandler(async (req, res) => {
     performedBy: req.user._id,
     relatedModel: "StockIssue",
     relatedId: issue._id,
-    note: note || purpose
+    note: note || purpose,
+    suppressRealtime: true
   });
 
   const populated = await StockIssue.findById(issue._id)
@@ -90,6 +92,14 @@ const createIssue = asyncHandler(async (req, res) => {
     .populate("issuedBy", "name");
 
   res.status(201).json(populated);
+  emitInventoryUpdate({
+    area: "issues",
+    areas: ["issues", "items", "stock", "dashboard", "reports", "departments"],
+    action: "created",
+    issueId: issue._id,
+    itemId,
+    departmentId: issuedToDepartment
+  });
 });
 
 module.exports = { getIssues, getIssue, createIssue };

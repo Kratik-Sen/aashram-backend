@@ -17,11 +17,24 @@ const initRealtime = (server) => {
   return io;
 };
 
+const normalizeAreas = (payload) => {
+  const areas = [
+    payload.area,
+    ...(Array.isArray(payload.areas) ? payload.areas : [])
+  ].filter(Boolean);
+
+  return [...new Set(areas)];
+};
+
 const emitInventoryUpdate = (payload = {}) => {
   if (!io) return;
+  const areas = normalizeAreas(payload);
 
   io.emit("inventory:updated", {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     at: new Date().toISOString(),
+    area: payload.area || areas[0] || "dashboard",
+    areas,
     ...payload
   });
 };

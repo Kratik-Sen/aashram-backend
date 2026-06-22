@@ -3,6 +3,7 @@ const { uploadToCloudinary } = require("../config/cloudinary");
 const { adjustStock, toPositiveNumber } = require("../utils/stock");
 const Item = require("../models/Item");
 const Donation = require("../models/Donation");
+const { emitInventoryUpdate } = require("../utils/realtime");
 
 const buildDateFilter = (field, startDate, endDate) => {
   if (!startDate && !endDate) return {};
@@ -71,10 +72,13 @@ const createDonation = asyncHandler(async (req, res) => {
   const parsedQuantity = toPositiveNumber(quantity);
   const item = await findOrCreateDonationItem({ itemName, category, unit });
 
-  let image;
-  if (req.file) {
-    image = await uploadToCloudinary(req.file.buffer, "aashram-inventory/donations");
-  }
+  const uploadFiles = [
+    ...(req.files?.images || []),
+    ...(req.files?.image || [])
+  ].slice(0, 3);
+  const images = uploadFiles.length
+    ? await Promise.all(uploadFiles.map((file) => uploadToCloudinary(file.buffer, "aashram-inventory/donations")))
+    : [];
 
   const donation = await Donation.create({
     donorName,
@@ -85,7 +89,8 @@ const createDonation = asyncHandler(async (req, res) => {
     quantity: parsedQuantity,
     unit,
     donationDate: donationDate || Date.now(),
-    image,
+    image: images[0],
+    images,
     note,
     recordedBy: req.user._id
   });
@@ -98,7 +103,8 @@ const createDonation = asyncHandler(async (req, res) => {
     performedBy: req.user._id,
     relatedModel: "Donation",
     relatedId: donation._id,
-    note: note || `Donation from ${donorName}`
+    note: note || `Donation from ${donorName}`,
+    suppressRealtime: true
   });
 
   const populated = await Donation.findById(donation._id)
@@ -106,6 +112,13 @@ const createDonation = asyncHandler(async (req, res) => {
     .populate("recordedBy", "name");
 
   res.status(201).json(populated);
+  emitInventoryUpdate({
+    area: "donations",
+    areas: ["donations", "items", "stock", "dashboard", "reports"],
+    action: "created",
+    donationId: donation._id,
+    itemId: item._id
+  });
 });
 
 module.exports = { getDonations, getDonation, createDonation };
