@@ -1,11 +1,12 @@
 const { Server } = require("socket.io");
+const { getAllowedOrigins } = require("../config/urls");
 
 let io;
 
 const initRealtime = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: getAllowedOrigins(),
       methods: ["GET", "POST", "PUT", "DELETE"]
     }
   });

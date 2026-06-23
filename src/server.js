@@ -6,6 +6,7 @@ const dns = require("dns");
 const cors = require("cors");
 const morgan = require("morgan");
 const connectDB = require("./config/db");
+const { getAllowedOrigins, normalizeUrl } = require("./config/urls");
 const { initRealtime } = require("./utils/realtime");
 
 const authRoutes = require("./routes/authRoutes");
@@ -28,8 +29,16 @@ const port = process.env.PORT || 5000;
 connectDB();
 initRealtime(server);
 
+const allowedOrigins = getAllowedOrigins();
+
 app.use(cors({
-   origin:  "https://aashram-frontend.vercel.app/"
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(normalizeUrl(origin))) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  }
 }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));

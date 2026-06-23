@@ -2,6 +2,7 @@ const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const path = require("path");
 const streamifier = require("streamifier");
+const { getPublicApiUrl } = require("./urls");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -20,7 +21,7 @@ const saveLocalUpload = async (fileBuffer, folder = "aashram-inventory") => {
   const filePath = path.join(targetFolder, fileName);
   await fs.promises.writeFile(filePath, fileBuffer);
 
-  const publicBaseUrl = process.env.PUBLIC_API_URL || `http://localhost:${process.env.PORT || 5000}`;
+  const publicBaseUrl = getPublicApiUrl();
   const relativePath = path.relative(uploadRoot, filePath).split(path.sep).join("/");
 
   return {
