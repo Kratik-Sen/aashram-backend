@@ -29,7 +29,7 @@ connectDB();
 initRealtime(server);
 
 app.use(cors({
-   origin:  "http://localhost:5173"
+   origin:  "https://aashram-frontend.vercel.app"
 }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
