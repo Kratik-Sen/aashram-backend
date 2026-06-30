@@ -20,6 +20,7 @@ const supplierRoutes = require("./routes/supplierRoutes");
 const departmentRoutes = require("./routes/departmentRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 const app = express();
@@ -60,6 +61,7 @@ app.use("/api/suppliers", supplierRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

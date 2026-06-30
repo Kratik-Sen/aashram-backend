@@ -55,7 +55,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 
   res.json({ message: "User deleted" });
-  emitInventoryUpdate({ area: "users", areas: ["users"], action: "deleted", userId: user._id });
+  emitInventoryUpdate({ area: "users", areas: ["users"], action: "deleted", userId: user._id.toString() });
 });
 
 module.exports = { listUsers, updateUser, deleteUser };

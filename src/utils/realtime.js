@@ -1,5 +1,6 @@
 const { Server } = require("socket.io");
 const { getAllowedOrigins } = require("../config/urls");
+const { sendPushNotification } = require("./pushNotifications");
 
 let io;
 
@@ -31,12 +32,19 @@ const emitInventoryUpdate = (payload = {}) => {
   if (!io) return;
   const areas = normalizeAreas(payload);
 
-  io.emit("inventory:updated", {
+  const event = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     at: new Date().toISOString(),
     area: payload.area || areas[0] || "dashboard",
     areas,
     ...payload
+  };
+
+  io.emit("inventory:updated", event);
+  sendPushNotification(event).catch((error) => {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Push notification failed", error);
+    }
   });
 };
 

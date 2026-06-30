@@ -35,7 +35,34 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["active", "inactive"],
       default: "active"
-    }
+    },
+    pushSubscriptions: [
+      {
+        endpoint: {
+          type: String,
+          required: true
+        },
+        expirationTime: {
+          type: Date,
+          default: null
+        },
+        keys: {
+          p256dh: {
+            type: String,
+            required: true
+          },
+          auth: {
+            type: String,
+            required: true
+          }
+        },
+        userAgent: String,
+        createdAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ]
   },
   { timestamps: true }
 );
