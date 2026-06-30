@@ -15,12 +15,30 @@ const configureWebPush = () => {
   return true;
 };
 
-const areaLabel = (area = "dashboard") => area.charAt(0).toUpperCase() + area.slice(1);
+const areaLabel = (area = "dashboard") => area
+  .split(/[-_\s]+/)
+  .filter(Boolean)
+  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+  .join(" ");
+
+const urlByArea = {
+  dashboard: "/",
+  items: "/items",
+  stock: "/items",
+  purchases: "/purchases",
+  issues: "/issues",
+  donations: "/donations",
+  requests: "/requests",
+  suppliers: "/suppliers",
+  departments: "/departments",
+  reports: "/reports",
+  users: "/users"
+};
 
 const buildNotificationPayload = (event = {}) => ({
-  title: "Aashram Inventory updated",
-  body: `${areaLabel(event.area)} ${event.action || "updated"}`,
-  url: "/",
+  title: `Aashram ${areaLabel(event.area)} update`,
+  body: `${areaLabel(event.area)} was ${event.action || "updated"}. Open to view the latest changes.`,
+  url: event.url || urlByArea[event.area] || "/",
   tag: event.id || `${event.area || "inventory"}-${Date.now()}`
 });
 

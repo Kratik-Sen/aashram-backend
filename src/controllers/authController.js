@@ -5,6 +5,15 @@ const { emitInventoryUpdate } = require("../utils/realtime");
 
 const signToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
+const normalizeDepartment = (department) => department || null;
+
+const buildUserIdentityFilter = ({ name, email, role, department }) => ({
+  name: String(name || "").trim(),
+  email: String(email || "").trim().toLowerCase(),
+  role,
+  department: normalizeDepartment(department)
+});
+
 const userResponse = (user) => ({
   _id: user._id,
   name: user.name,
@@ -44,17 +53,23 @@ const register = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Name, email, password, and role are required" });
   }
 
-  const exists = await User.findOne({ email: email.toLowerCase() });
+  const identityFilter = buildUserIdentityFilter({ name, email, role, department });
+  const exactExists = await User.findOne(identityFilter);
+  if (exactExists) {
+    return res.status(409).json({ message: "A user with the same name, email, role, and department already exists" });
+  }
+
+  const exists = await User.findOne({ email: identityFilter.email });
   if (exists) {
     return res.status(409).json({ message: "A user with this email already exists" });
   }
 
   const user = await User.create({
-    name,
-    email,
+    name: identityFilter.name,
+    email: identityFilter.email,
     password,
     role,
-    department: department || null,
+    department: identityFilter.department,
     status: status || "active"
   });
 
