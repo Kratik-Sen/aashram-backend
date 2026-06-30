@@ -4,6 +4,7 @@ const Purchase = require("../models/Purchase");
 const StockIssue = require("../models/StockIssue");
 const Donation = require("../models/Donation");
 const StockTransaction = require("../models/StockTransaction");
+const { paginatedArrayResponse, paginatedResponse } = require("../utils/pagination");
 
 const dateRange = (field, startDate, endDate) => {
   if (!startDate && !endDate) return {};
@@ -23,8 +24,12 @@ const stockReport = asyncHandler(async (req, res) => {
   if (category) filter.category = category;
   if (status) filter.status = status;
 
-  const items = await Item.find(filter).sort({ category: 1, itemName: 1 });
-  res.json(items);
+  return paginatedResponse({
+    req,
+    res,
+    query: Item.find(filter).sort({ category: 1, itemName: 1 }),
+    countQuery: Item.countDocuments(filter)
+  });
 });
 
 const purchaseReport = asyncHandler(async (req, res) => {
@@ -33,13 +38,16 @@ const purchaseReport = asyncHandler(async (req, res) => {
   if (itemId) filter.itemId = itemId;
   if (supplierId) filter.supplierId = supplierId;
 
-  const rows = await Purchase.find(filter)
-    .populate("itemId", "itemName category unit")
-    .populate("supplierId", "supplierName")
-    .populate("purchasedBy", "name")
-    .sort({ purchaseDate: -1 });
-
-  res.json(rows);
+  return paginatedResponse({
+    req,
+    res,
+    query: Purchase.find(filter)
+      .populate("itemId", "itemName category unit")
+      .populate("supplierId", "supplierName")
+      .populate("purchasedBy", "name")
+      .sort({ purchaseDate: -1 }),
+    countQuery: Purchase.countDocuments(filter)
+  });
 });
 
 const issueReport = asyncHandler(async (req, res) => {
@@ -48,13 +56,16 @@ const issueReport = asyncHandler(async (req, res) => {
   if (itemId) filter.itemId = itemId;
   if (departmentId) filter.issuedToDepartment = departmentId;
 
-  const rows = await StockIssue.find(filter)
-    .populate("itemId", "itemName category unit")
-    .populate("issuedToDepartment", "name")
-    .populate("issuedBy", "name")
-    .sort({ issueDate: -1 });
-
-  res.json(rows);
+  return paginatedResponse({
+    req,
+    res,
+    query: StockIssue.find(filter)
+      .populate("itemId", "itemName category unit")
+      .populate("issuedToDepartment", "name")
+      .populate("issuedBy", "name")
+      .sort({ issueDate: -1 }),
+    countQuery: StockIssue.countDocuments(filter)
+  });
 });
 
 const donationReport = asyncHandler(async (req, res) => {
@@ -63,12 +74,15 @@ const donationReport = asyncHandler(async (req, res) => {
   if (category) filter.category = category;
   if (itemId) filter.itemId = itemId;
 
-  const rows = await Donation.find(filter)
-    .populate("itemId", "itemName category unit")
-    .populate("recordedBy", "name")
-    .sort({ donationDate: -1 });
-
-  res.json(rows);
+  return paginatedResponse({
+    req,
+    res,
+    query: Donation.find(filter)
+      .populate("itemId", "itemName category unit")
+      .populate("recordedBy", "name")
+      .sort({ donationDate: -1 }),
+    countQuery: Donation.countDocuments(filter)
+  });
 });
 
 const lowStockReport = asyncHandler(async (req, res) => {
@@ -79,8 +93,12 @@ const lowStockReport = asyncHandler(async (req, res) => {
   };
   if (category) filter.category = category;
 
-  const rows = await Item.find(filter).sort({ currentStock: 1 });
-  res.json(rows);
+  return paginatedResponse({
+    req,
+    res,
+    query: Item.find(filter).sort({ currentStock: 1 }),
+    countQuery: Item.countDocuments(filter)
+  });
 });
 
 const monthlyExpenseReport = asyncHandler(async (req, res) => {
@@ -103,7 +121,7 @@ const monthlyExpenseReport = asyncHandler(async (req, res) => {
     { $sort: { "_id.year": -1, "_id.month": -1 } }
   ]);
 
-  res.json(rows.map((row) => ({
+  return paginatedArrayResponse(req, res, rows.map((row) => ({
     month: `${row._id.year}-${String(row._id.month).padStart(2, "0")}`,
     totalExpense: row.totalExpense,
     purchases: row.purchases,
@@ -136,7 +154,7 @@ const departmentUsageReport = asyncHandler(async (req, res) => {
     { $sort: { totalQuantity: -1 } }
   ]);
 
-  res.json(rows.map((row) => ({
+  return paginatedArrayResponse(req, res, rows.map((row) => ({
     department: row.department.name,
     totalQuantity: row.totalQuantity,
     issueCount: row.issueCount
@@ -150,12 +168,15 @@ const transactionsReport = asyncHandler(async (req, res) => {
   if (type) filter.type = type;
   if (source) filter.source = source;
 
-  const rows = await StockTransaction.find(filter)
-    .populate("itemId", "itemName category unit")
-    .populate("performedBy", "name role")
-    .sort({ createdAt: -1 });
-
-  res.json(rows);
+  return paginatedResponse({
+    req,
+    res,
+    query: StockTransaction.find(filter)
+      .populate("itemId", "itemName category unit")
+      .populate("performedBy", "name role")
+      .sort({ createdAt: -1 }),
+    countQuery: StockTransaction.countDocuments(filter)
+  });
 });
 
 module.exports = {

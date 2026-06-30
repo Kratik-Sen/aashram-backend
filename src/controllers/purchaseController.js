@@ -4,6 +4,7 @@ const { adjustStock, toPositiveNumber } = require("../utils/stock");
 const Item = require("../models/Item");
 const Supplier = require("../models/Supplier");
 const Purchase = require("../models/Purchase");
+const { paginatedResponse } = require("../utils/pagination");
 const { emitInventoryUpdate } = require("../utils/realtime");
 
 const buildDateFilter = (field, startDate, endDate) => {
@@ -27,13 +28,16 @@ const getPurchases = asyncHandler(async (req, res) => {
   if (itemId) filter.itemId = itemId;
   if (supplierId) filter.supplierId = supplierId;
 
-  const purchases = await Purchase.find(filter)
-    .populate("itemId", "itemName category unit")
-    .populate("supplierId", "supplierName phone")
-    .populate("purchasedBy", "name")
-    .sort({ purchaseDate: -1, createdAt: -1 });
-
-  res.json(purchases);
+  return paginatedResponse({
+    req,
+    res,
+    query: Purchase.find(filter)
+      .populate("itemId", "itemName category unit")
+      .populate("supplierId", "supplierName phone")
+      .populate("purchasedBy", "name")
+      .sort({ purchaseDate: -1, createdAt: -1 }),
+    countQuery: Purchase.countDocuments(filter)
+  });
 });
 
 const getPurchase = asyncHandler(async (req, res) => {

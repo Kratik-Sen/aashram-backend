@@ -3,6 +3,7 @@ const { uploadToCloudinary } = require("../config/cloudinary");
 const { adjustStock, toPositiveNumber } = require("../utils/stock");
 const Item = require("../models/Item");
 const Donation = require("../models/Donation");
+const { paginatedResponse } = require("../utils/pagination");
 const { emitInventoryUpdate } = require("../utils/realtime");
 
 const buildDateFilter = (field, startDate, endDate) => {
@@ -26,12 +27,15 @@ const getDonations = asyncHandler(async (req, res) => {
   if (itemId) filter.itemId = itemId;
   if (category) filter.category = category;
 
-  const donations = await Donation.find(filter)
-    .populate("itemId", "itemName category unit currentStock")
-    .populate("recordedBy", "name")
-    .sort({ donationDate: -1, createdAt: -1 });
-
-  res.json(donations);
+  return paginatedResponse({
+    req,
+    res,
+    query: Donation.find(filter)
+      .populate("itemId", "itemName category unit currentStock")
+      .populate("recordedBy", "name")
+      .sort({ donationDate: -1, createdAt: -1 }),
+    countQuery: Donation.countDocuments(filter)
+  });
 });
 
 const getDonation = asyncHandler(async (req, res) => {

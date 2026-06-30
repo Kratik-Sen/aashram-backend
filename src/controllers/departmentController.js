@@ -2,6 +2,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const Department = require("../models/Department");
 const StockIssue = require("../models/StockIssue");
 const Request = require("../models/Request");
+const { paginatedResponse } = require("../utils/pagination");
 const { emitInventoryUpdate } = require("../utils/realtime");
 
 const getDepartments = asyncHandler(async (req, res) => {
@@ -11,8 +12,12 @@ const getDepartments = asyncHandler(async (req, res) => {
   if (status) filter.status = status;
   if (search) filter.name = new RegExp(search, "i");
 
-  const departments = await Department.find(filter).sort({ name: 1 });
-  res.json(departments);
+  return paginatedResponse({
+    req,
+    res,
+    query: Department.find(filter).sort({ name: 1 }),
+    countQuery: Department.countDocuments(filter)
+  });
 });
 
 const getDepartment = asyncHandler(async (req, res) => {

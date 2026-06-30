@@ -3,6 +3,7 @@ const { adjustStock, toPositiveNumber } = require("../utils/stock");
 const Item = require("../models/Item");
 const Department = require("../models/Department");
 const StockIssue = require("../models/StockIssue");
+const { paginatedResponse } = require("../utils/pagination");
 const { emitInventoryUpdate } = require("../utils/realtime");
 
 const buildDateFilter = (field, startDate, endDate) => {
@@ -26,13 +27,16 @@ const getIssues = asyncHandler(async (req, res) => {
   if (itemId) filter.itemId = itemId;
   if (departmentId) filter.issuedToDepartment = departmentId;
 
-  const issues = await StockIssue.find(filter)
-    .populate("itemId", "itemName category unit")
-    .populate("issuedToDepartment", "name")
-    .populate("issuedBy", "name")
-    .sort({ issueDate: -1, createdAt: -1 });
-
-  res.json(issues);
+  return paginatedResponse({
+    req,
+    res,
+    query: StockIssue.find(filter)
+      .populate("itemId", "itemName category unit")
+      .populate("issuedToDepartment", "name")
+      .populate("issuedBy", "name")
+      .sort({ issueDate: -1, createdAt: -1 }),
+    countQuery: StockIssue.countDocuments(filter)
+  });
 });
 
 const getIssue = asyncHandler(async (req, res) => {

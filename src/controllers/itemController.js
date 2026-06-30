@@ -1,6 +1,7 @@
 const asyncHandler = require("../utils/asyncHandler");
 const Item = require("../models/Item");
 const StockTransaction = require("../models/StockTransaction");
+const { paginatedResponse } = require("../utils/pagination");
 const { emitInventoryUpdate } = require("../utils/realtime");
 
 const getItems = asyncHandler(async (req, res) => {
@@ -21,8 +22,12 @@ const getItems = asyncHandler(async (req, res) => {
     filter.$expr = { $lte: ["$currentStock", "$minimumStock"] };
   }
 
-  const items = await Item.find(filter).sort({ itemName: 1 });
-  res.json(items);
+  return paginatedResponse({
+    req,
+    res,
+    query: Item.find(filter).sort({ itemName: 1 }),
+    countQuery: Item.countDocuments(filter)
+  });
 });
 
 const getLowStockItems = asyncHandler(async (req, res) => {

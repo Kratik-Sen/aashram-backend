@@ -1,12 +1,20 @@
 const normalizeUrl = (url) => url.trim().replace(/\/+$/, "");
 
-const getAllowedOrigins = () => {
-  const frontendUrls = process.env.FRONTEND_URL || "http://localhost:5173";
+const LOCAL_DEV_ORIGINS = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173"
+];
 
-  return frontendUrls
-    .split(",")
+const getAllowedOrigins = () => {
+  const configuredOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(",")
+    : [];
+  const defaultOrigins = process.env.NODE_ENV === "production" ? [] : LOCAL_DEV_ORIGINS;
+
+  return [...configuredOrigins, ...defaultOrigins]
     .map((url) => normalizeUrl(url))
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((url, index, origins) => origins.indexOf(url) === index);
 };
 
 const getPublicApiUrl = () => {

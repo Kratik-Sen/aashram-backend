@@ -1,6 +1,7 @@
 const asyncHandler = require("../utils/asyncHandler");
 const Supplier = require("../models/Supplier");
 const Purchase = require("../models/Purchase");
+const { paginatedResponse } = require("../utils/pagination");
 const { emitInventoryUpdate } = require("../utils/realtime");
 
 const getSuppliers = asyncHandler(async (req, res) => {
@@ -16,8 +17,12 @@ const getSuppliers = asyncHandler(async (req, res) => {
     ];
   }
 
-  const suppliers = await Supplier.find(filter).sort({ supplierName: 1 });
-  res.json(suppliers);
+  return paginatedResponse({
+    req,
+    res,
+    query: Supplier.find(filter).sort({ supplierName: 1 }),
+    countQuery: Supplier.countDocuments(filter)
+  });
 });
 
 const getSupplier = asyncHandler(async (req, res) => {

@@ -3,6 +3,7 @@ const { adjustStock, toPositiveNumber } = require("../utils/stock");
 const Item = require("../models/Item");
 const Department = require("../models/Department");
 const Request = require("../models/Request");
+const { paginatedResponse } = require("../utils/pagination");
 const { emitInventoryUpdate } = require("../utils/realtime");
 
 const staffRoles = ["Kitchen Staff", "Department Staff"];
@@ -16,14 +17,17 @@ const getRequests = asyncHandler(async (req, res) => {
   if (itemId) filter.itemId = itemId;
   if (staffRoles.includes(req.user.role)) filter.requestedBy = req.user._id;
 
-  const requests = await Request.find(filter)
-    .populate("itemId", "itemName category unit currentStock")
-    .populate("requestedBy", "name role")
-    .populate("department", "name")
-    .populate("approvedBy rejectedBy issuedBy", "name")
-    .sort({ createdAt: -1 });
-
-  res.json(requests);
+  return paginatedResponse({
+    req,
+    res,
+    query: Request.find(filter)
+      .populate("itemId", "itemName category unit currentStock")
+      .populate("requestedBy", "name role")
+      .populate("department", "name")
+      .populate("approvedBy rejectedBy issuedBy", "name")
+      .sort({ createdAt: -1 }),
+    countQuery: Request.countDocuments(filter)
+  });
 });
 
 const createRequest = asyncHandler(async (req, res) => {

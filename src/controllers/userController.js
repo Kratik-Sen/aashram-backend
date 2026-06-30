@@ -1,5 +1,6 @@
 const asyncHandler = require("../utils/asyncHandler");
 const User = require("../models/User");
+const { paginatedResponse } = require("../utils/pagination");
 const { emitInventoryUpdate } = require("../utils/realtime");
 
 const listUsers = asyncHandler(async (req, res) => {
@@ -15,8 +16,12 @@ const listUsers = asyncHandler(async (req, res) => {
     ];
   }
 
-  const users = await User.find(filter).populate("department", "name").sort({ createdAt: -1 });
-  res.json(users);
+  return paginatedResponse({
+    req,
+    res,
+    query: User.find(filter).populate("department", "name").sort({ createdAt: -1 }),
+    countQuery: User.countDocuments(filter)
+  });
 });
 
 const updateUser = asyncHandler(async (req, res) => {
