@@ -68,7 +68,7 @@ const updateUser = asyncHandler(async (req, res) => {
   await user.save();
   const updated = await User.findById(user._id).populate("department", "name");
   res.json(updated);
-  emitInventoryUpdate({ area: "users", areas: ["users"], action: "updated", userId: user._id });
+  emitInventoryUpdate({ area: "users", areas: ["users"], action: "updated", userId: user._id, userName: updated.name });
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
@@ -82,7 +82,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 
   res.json({ message: "User deleted" });
-  emitInventoryUpdate({ area: "users", areas: ["users"], action: "deleted", userId: user._id.toString() });
+  emitInventoryUpdate({ area: "users", areas: ["users"], action: "deleted", userId: user._id.toString(), userName: user.name });
 });
 
 module.exports = { listUsers, updateUser, deleteUser };

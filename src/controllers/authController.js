@@ -75,7 +75,7 @@ const register = asyncHandler(async (req, res) => {
 
   const populatedUser = await User.findById(user._id).populate("department", "name");
   res.status(201).json({ user: userResponse(populatedUser) });
-  emitInventoryUpdate({ area: "users", areas: ["users"], action: "created", userId: user._id });
+  emitInventoryUpdate({ area: "users", areas: ["users"], action: "created", userId: user._id, userName: populatedUser.name });
 });
 
 const me = asyncHandler(async (req, res) => {

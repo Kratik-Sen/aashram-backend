@@ -72,7 +72,12 @@ const createRequest = asyncHandler(async (req, res) => {
     areas: ["requests", "dashboard", "reports"],
     action: "created",
     requestId: request._id,
-    departmentId
+    departmentId,
+    itemName: populated.itemId?.itemName,
+    quantity: populated.quantity,
+    unit: populated.itemId?.unit,
+    departmentName: populated.department?.name,
+    requestedByName: populated.requestedBy?.name
   });
 });
 
@@ -101,7 +106,12 @@ const approveRequest = asyncHandler(async (req, res) => {
     areas: ["requests", "dashboard", "reports"],
     action: "approved",
     requestId: request._id,
-    departmentId: request.department
+    departmentId: request.department,
+    itemName: populated.itemId?.itemName,
+    quantity: populated.quantity,
+    unit: populated.itemId?.unit,
+    departmentName: populated.department?.name,
+    requestedByName: populated.requestedBy?.name
   });
 });
 
@@ -130,7 +140,12 @@ const rejectRequest = asyncHandler(async (req, res) => {
     areas: ["requests", "dashboard", "reports"],
     action: "rejected",
     requestId: request._id,
-    departmentId: request.department
+    departmentId: request.department,
+    itemName: populated.itemId?.itemName,
+    quantity: populated.quantity,
+    unit: populated.itemId?.unit,
+    departmentName: populated.department?.name,
+    requestedByName: populated.requestedBy?.name
   });
 });
 
@@ -176,7 +191,12 @@ const issueRequest = asyncHandler(async (req, res) => {
     action: "issued",
     requestId: request._id,
     itemId: request.itemId._id,
-    departmentId: request.department
+    departmentId: request.department,
+    itemName: populated.itemId?.itemName,
+    quantity: populated.quantity,
+    unit: populated.itemId?.unit,
+    departmentName: populated.department?.name,
+    requestedByName: populated.requestedBy?.name
   });
 });
 

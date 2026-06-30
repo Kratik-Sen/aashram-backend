@@ -1,5 +1,6 @@
 const webpush = require("web-push");
 const User = require("../models/User");
+const { buildInventoryMessage } = require("./inventoryMessages");
 
 const isConfigured = () => Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
 
@@ -15,33 +16,6 @@ const configureWebPush = () => {
   return true;
 };
 
-const areaLabel = (area = "dashboard") => area
-  .split(/[-_\s]+/)
-  .filter(Boolean)
-  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-  .join(" ");
-
-const urlByArea = {
-  dashboard: "/",
-  items: "/items",
-  stock: "/items",
-  purchases: "/purchases",
-  issues: "/issues",
-  donations: "/donations",
-  requests: "/requests",
-  suppliers: "/suppliers",
-  departments: "/departments",
-  reports: "/reports",
-  users: "/users"
-};
-
-const buildNotificationPayload = (event = {}) => ({
-  title: `Aashram ${areaLabel(event.area)} update`,
-  body: `${areaLabel(event.area)} was ${event.action || "updated"}. Open to view the latest changes.`,
-  url: event.url || urlByArea[event.area] || "/",
-  tag: event.id || `${event.area || "inventory"}-${Date.now()}`
-});
-
 const removeExpiredSubscription = async (endpoint) => {
   await User.updateMany(
     { "pushSubscriptions.endpoint": endpoint },
@@ -53,7 +27,7 @@ const sendPushNotification = async (event) => {
   if (!configureWebPush()) return;
 
   const users = await User.find({ "pushSubscriptions.0": { $exists: true }, status: "active" }).select("pushSubscriptions");
-  const payload = JSON.stringify(buildNotificationPayload(event));
+  const payload = JSON.stringify(buildInventoryMessage(event));
 
   await Promise.all(users.flatMap((user) => (
     user.pushSubscriptions.map(async (subscription) => {

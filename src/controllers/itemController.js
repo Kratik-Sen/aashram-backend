@@ -72,7 +72,7 @@ const createItem = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json(item);
-  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "created", itemId: item._id });
+  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "created", itemId: item._id, itemName: item.itemName });
 });
 
 const updateItem = asyncHandler(async (req, res) => {
@@ -93,7 +93,7 @@ const updateItem = asyncHandler(async (req, res) => {
 
   await item.save();
   res.json(item);
-  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "updated", itemId: item._id });
+  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "updated", itemId: item._id, itemName: item.itemName });
 });
 
 const deleteItem = asyncHandler(async (req, res) => {
@@ -104,7 +104,7 @@ const deleteItem = asyncHandler(async (req, res) => {
   }
 
   res.json({ message: "Item deleted" });
-  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "deleted", itemId: item._id });
+  emitInventoryUpdate({ area: "items", areas: ["items", "dashboard", "reports"], action: "deleted", itemId: item._id, itemName: item.itemName });
 });
 
 module.exports = { getItems, getLowStockItems, getItem, createItem, updateItem, deleteItem };

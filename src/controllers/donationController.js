@@ -121,7 +121,11 @@ const createDonation = asyncHandler(async (req, res) => {
     areas: ["donations", "items", "stock", "dashboard", "reports"],
     action: "created",
     donationId: donation._id,
-    itemId: item._id
+    itemId: item._id,
+    itemName: populated.itemName || populated.itemId?.itemName,
+    quantity: populated.quantity,
+    unit: populated.unit,
+    donorName: populated.donorName
   });
 });
 

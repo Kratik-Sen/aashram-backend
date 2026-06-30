@@ -53,7 +53,7 @@ const createSupplier = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json(supplier);
-  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "created", supplierId: supplier._id });
+  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "created", supplierId: supplier._id, supplierName: supplier.supplierName });
 });
 
 const updateSupplier = asyncHandler(async (req, res) => {
@@ -72,7 +72,7 @@ const updateSupplier = asyncHandler(async (req, res) => {
 
   await supplier.save();
   res.json(supplier);
-  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "updated", supplierId: supplier._id });
+  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "updated", supplierId: supplier._id, supplierName: supplier.supplierName });
 });
 
 const deleteSupplier = asyncHandler(async (req, res) => {
@@ -80,7 +80,7 @@ const deleteSupplier = asyncHandler(async (req, res) => {
   if (!supplier) return res.status(404).json({ message: "Supplier not found" });
 
   res.json({ message: "Supplier deleted" });
-  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "deleted", supplierId: supplier._id });
+  emitInventoryUpdate({ area: "suppliers", areas: ["suppliers", "dashboard", "reports"], action: "deleted", supplierId: supplier._id, supplierName: supplier.supplierName });
 });
 
 module.exports = { getSuppliers, getSupplier, createSupplier, updateSupplier, deleteSupplier };

@@ -113,7 +113,11 @@ const createPurchase = asyncHandler(async (req, res) => {
     action: "created",
     purchaseId: purchase._id,
     itemId,
-    supplierId
+    supplierId,
+    itemName: populated.itemId?.itemName,
+    quantity: populated.quantity,
+    unit: populated.itemId?.unit,
+    supplierName: populated.supplierId?.supplierName
   });
 });
 

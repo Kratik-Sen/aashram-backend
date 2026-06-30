@@ -102,7 +102,11 @@ const createIssue = asyncHandler(async (req, res) => {
     action: "created",
     issueId: issue._id,
     itemId,
-    departmentId: issuedToDepartment
+    departmentId: issuedToDepartment,
+    itemName: populated.itemId?.itemName,
+    quantity: populated.quantity,
+    unit: populated.itemId?.unit,
+    departmentName: populated.issuedToDepartment?.name
   });
 });
 

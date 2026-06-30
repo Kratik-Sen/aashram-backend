@@ -1,5 +1,6 @@
 const { Server } = require("socket.io");
 const { getAllowedOrigins } = require("../config/urls");
+const { buildInventoryMessage } = require("./inventoryMessages");
 const { sendPushNotification } = require("./pushNotifications");
 
 let io;
@@ -32,12 +33,17 @@ const emitInventoryUpdate = (payload = {}) => {
   if (!io) return;
   const areas = normalizeAreas(payload);
 
-  const event = {
+  const baseEvent = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     at: new Date().toISOString(),
     area: payload.area || areas[0] || "dashboard",
     areas,
     ...payload
+  };
+  const notification = buildInventoryMessage(baseEvent);
+  const event = {
+    ...baseEvent,
+    ...notification
   };
 
   io.emit("inventory:updated", event);
