@@ -57,11 +57,11 @@ const buildInventoryMessage = (event = {}) => {
   const message = event.message || messages[`${area}:${action}`] || `${areaLabel(area)} ${action}.`;
 
   return {
-    title: event.title || `Aashram ${areaLabel(area)} alert`,
+    title: event.title || "Aashram Inventory",
     body: event.body || message,
     message,
     url: event.url || urlByArea[area] || "/",
-    tag: event.tag || event.id || `${area}-${Date.now()}`
+    tag: event.tag || `aashram-${area}`
   };
 };
 
